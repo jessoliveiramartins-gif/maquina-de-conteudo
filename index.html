@@ -258,7 +258,9 @@ footer{padding:28px 16px 120px;text-align:center;color:var(--mute);font-size:12.
 <div class="bar" id="bar"><span><s>R$ 989</s>R$ 97 · pagamento único</span><a class="btn" href="#oferta">Quero a minha máquina</a></div>
 <script>
 const CHECKOUT='https://pay.hotmart.com/I108499200C';/* link do checkout */
-if(CHECKOUT){document.querySelectorAll('a.btn').forEach(b=>{b.href=CHECKOUT;b.target='_blank';b.rel='noopener'});document.getElementById('buys').hidden=true}
+/* leva o rastreamento do anúncio (UTMs) até o checkout da Hotmart */
+function linkCheckout(){try{const q=new URLSearchParams(location.search),o=new URLSearchParams();['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(k=>{if(q.get(k))o.set(k,q.get(k))});const sck=[q.get('utm_source'),q.get('utm_campaign'),q.get('utm_content'),q.get('utm_term')].filter(Boolean).join('|').slice(0,200);if(sck)o.set('sck',sck);const t=o.toString();return t?CHECKOUT+'?'+t:CHECKOUT}catch(e){return CHECKOUT}}
+if(CHECKOUT){const L=linkCheckout();document.querySelectorAll('a.btn').forEach(b=>{b.href=L;b.target='_blank';b.rel='noopener'});document.getElementById('buys').hidden=true}
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in-v');io.unobserve(e.target)}}),{threshold:.12});
 document.querySelectorAll('.rv').forEach((n,i)=>{n.style.transitionDelay=(i%4)*70+'ms';io.observe(n)});
 const bar=document.getElementById('bar'),of=document.getElementById('oferta');
