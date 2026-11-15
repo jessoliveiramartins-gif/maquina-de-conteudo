@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Mural do histórico | Máquina de Conteúdo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{--bg:#05070f;--bg2:#090d1b;--fg:#f4f7ff;--mute:#8d98b8;--line:rgba(255,255,255,.12);--lime:#b9ff3b;--roxo:#7c5cff}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(900px 500px at 50% -10%,rgba(124,92,255,.28),transparent 60%),var(--bg);color:var(--fg);font:16px/1.6 Sora,system-ui,sans-serif;min-height:100vh}
+.w{max-width:720px;margin:0 auto;padding:28px max(16px,env(safe-area-inset-right)) 64px max(16px,env(safe-area-inset-left))}
+.tag{font:700 11px/1 "JetBrains Mono",monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--lime)}
+h1{font-size:clamp(30px,7vw,44px);line-height:1.08;margin:14px 0 10px;font-weight:800;text-wrap:balance}
+h1 em{font-style:normal;color:var(--lime)}
+.sub{color:var(--mute);margin:0 0 22px;max-width:56ch}
+.filtros{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+.filtros button{font:600 13px Sora,sans-serif;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer}
+.filtros button[aria-pressed=true]{background:var(--lime);color:#0a0f02;border-color:var(--lime)}
+.dia{font:700 12px/1 "JetBrains Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:26px 0 10px}
+.post{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:18px;margin:0 0 12px}
+.post .tipo{display:inline-block;font:700 10px/1 "JetBrains Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--roxo);border:1px solid rgba(124,92,255,.5);border-radius:999px;padding:5px 9px;margin-bottom:10px;color:#b8a8ff}
+.post h2{font-size:19px;line-height:1.25;margin:0 0 8px;font-weight:700}
+.post p{margin:0 0 10px;color:#d5dbef;white-space:pre-line;overflow-wrap:anywhere}
+.post video,.post img{width:100%;max-height:70vh;border-radius:12px;background:#000;margin:6px 0 10px;display:block;object-fit:contain}
+.post .links{display:flex;flex-wrap:wrap;gap:8px}
+.post .links a{font-weight:600;font-size:14px;color:#0a0f02;background:var(--lime);border-radius:10px;padding:9px 14px;text-decoration:none}
+.vazio{color:var(--mute);border:1px dashed var(--line);border-radius:16px;padding:22px;text-align:center}
+footer{color:var(--mute);font-size:13px;margin-top:36px;border-top:1px solid var(--line);padding-top:16px}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="tag">Máquina de Conteúdo · alunos</div>
+  <h1>Mural do <em>histórico</em></h1>
+  <p class="sub">Tudo o que já foi enviado no grupo do WhatsApp fica guardado aqui. Estude no seu ritmo, sem a sensação de estar atrasado.</p>
+  <div class="filtros" id="filtros"></div>
+  <div id="lista"><div class="vazio">Carregando o mural…</div></div>
+  <footer>Meu Primeiro App · página exclusiva dos alunos. Por favor, não compartilhe este link.</footer>
+</div>
+<script>
+const M=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+let posts=[],filtro='Tudo';
+function dia(d){const [a,m,dd]=d.split('-').map(Number);return dd+' de '+M[m-1]+' de '+a}
+function desenha(){
+  const L=document.getElementById('lista');L.textContent='';
+  const v=posts.filter(p=>filtro==='Tudo'||p.tipo===filtro);
+  if(!v.length){L.append(el('div','vazio','Ainda não há nada aqui.'));return}
+  let ult='';
+  v.forEach(p=>{
+    if(p.data!==ult){L.append(el('div','dia',dia(p.data)));ult=p.data}
+    const c=el('article','post');
+    if(p.tipo)c.append(el('span','tipo',p.tipo));
+    c.append(el('h2','',p.titulo));
+    if(p.video){const vd=el('video');vd.src=p.video;vd.controls=true;vd.preload='metadata';vd.playsInline=true;c.append(vd)}
+    if(p.imagem){const im=el('img');im.src=p.imagem;im.alt=p.titulo;im.loading='lazy';c.append(im)}
+    if(p.texto)c.append(el('p','',p.texto));
+    if(p.links&&p.links.length){const k=el('div','links');p.links.forEach(l=>{const a=el('a','',l.t);a.href=l.u;a.target='_blank';a.rel='noopener';k.append(a)});c.append(k)}
+    L.append(c);
+  });
+}
+function filtros(){
+  const F=document.getElementById('filtros');F.textContent='';
+  ['Tudo',...new Set(posts.map(p=>p.tipo).filter(Boolean))].forEach(t=>{
+    const b=el('button','',t);b.setAttribute('aria-pressed',t===filtro);
+    b.onclick=()=>{filtro=t;filtros();desenha()};F.append(b);
+  });
+}
+fetch('posts.json?v='+Date.now()).then(r=>r.json()).then(j=>{
+  posts=j.sort((a,b)=>b.data.localeCompare(a.data));filtros();desenha();
+}).catch(()=>{document.getElementById('lista').innerHTML='<div class="vazio">Não foi possível carregar agora. Atualize a página em instantes.</div>'});
+</script>
+</body>
+</html>
